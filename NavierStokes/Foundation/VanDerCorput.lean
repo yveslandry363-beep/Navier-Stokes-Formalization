@@ -23,10 +23,10 @@ structure OscillatoryIntegral1D where
 
 /-!
 ### Van Der Corput Lemmas
-⚠️ WARNING: Standard Mathlib limits do not currently have the 1D/2D stationary phase 
+⚠️ WARNING: Standard Mathlib limits do not currently have the 1D/2D stationary phase
 or Van der Corput theorems (binding $\int e^{i\lambda \phi} d\mu$ strictly by $\lambda^{-1/k}$).
 Proving this requires careful integration by parts and measure bounds.
-We leave the structure prepared for the Hessian degeneracy bounds 
+We leave the structure prepared for the Hessian degeneracy bounds
 without assuming a fake proof.
 -/
 
