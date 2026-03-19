@@ -53,14 +53,12 @@ lemma cross_product_term_bound (k a : Fin 3 → ℂ) :
                  Complex.normSq (crossProduct k a i) := by
     intro i
     exact normSq_I_smul (crossProduct k a i)
-
   -- 2. On applique cette égalité à toute la somme
   have h2 : (∑ i, Complex.normSq ((I : ℂ) • crossProduct k a i)) =
             ∑ i, Complex.normSq (crossProduct k a i) := by
     apply Finset.sum_congr rfl
     intro i _
     exact h1 i
-
   -- 3. On remplace dans le but, et on appelle ton théorème certifié !
   rw [h2]
   exact cross_product_bound k a
@@ -75,26 +73,21 @@ lemma vorticity_energy_bound (k : Fin 3 → ℤ) (V : Fin 3 → ℂ) :
     (1 + ∑ i, (k i : ℝ)^2) * (∑ i, Complex.normSq (V i)) := by
   -- On part de l'inégalité démontrée à l'étape 1
   have h1 := cross_product_term_bound (fun j => (k j : ℂ)) V
-
   -- On sait que normSq d'un entier projeté dans ℂ est simplement son carré réel
   have h_sum_k : (∑ i, Complex.normSq (↑(k i) : ℂ)) = ∑ i, (k i : ℝ)^2 := by
     apply Finset.sum_congr rfl
     intro i _
     -- La norme complexe au carré d'un réel pur est le carré de ce réel
     simp [Complex.normSq, pow_two]
-
   rw [h_sum_k] at h1
-
   -- On majore ∑ (k i)² par 1 + ∑ (k i)²
   have h_le : (∑ i, (k i : ℝ)^2) ≤ 1 + ∑ i, (k i : ℝ)^2 := by linarith
-
   -- On multiplie cette majoration par l'énergie de V (qui est positive)
   have h_V_pos : 0 ≤ ∑ i, Complex.normSq (V i) :=
     Finset.sum_nonneg (fun i _ => Complex.normSq_nonneg _)
   have h_mul_le : (∑ i, (k i : ℝ)^2) * (∑ i, Complex.normSq (V i)) ≤
                    (1 + ∑ i, (k i : ℝ)^2) * (∑ i, Complex.normSq (V i)) := by
     exact mul_le_mul_of_nonneg_right h_le h_V_pos
-
   -- On conclut par transitivité
   exact le_trans h1 h_mul_le
 
@@ -109,19 +102,16 @@ lemma helicitySummand_le_h1 (u v : Torus3.L2RealVector) (k : Fin 3 → ℤ) :
   let U := fourierCoeffVector u k
   let V := fourierCoeffVector v k
   let W := fun i => (I : ℂ) • crossProduct (fun j => (k j : ℂ)) V i
-
   -- 1. Cauchy-Schwarz sur le produit scalaire local (Ton lemme de Helicity.lean)
   have h_cs : helicitySummand k U V ≤
               Real.sqrt (∑ i, Complex.normSq (U i)) * Real.sqrt (∑ i, Complex.normSq (W i)) :=
     cauchy_schwarz_fin3 U W
-
   -- 2. Majoration de la norme de W par l'énergie H¹ de v
   have h_W_le := vorticity_energy_bound k V
   have h_sqrt_W : Real.sqrt (∑ i, Complex.normSq (W i)) ≤ Real.sqrt (h1Summand v k) := by
     apply Real.sqrt_le_sqrt
     -- h1Summand v k est EXACTEMENT la partie droite de h_W_le
     exact h_W_le
-
   -- 3. L'énergie H¹ de u majore l'énergie L² de U (car 1 + |k|² ≥ 1)
   have h_U_le : ∑ i, Complex.normSq (U i) ≤ h1Summand u k := by
     unfold h1Summand
@@ -134,19 +124,15 @@ lemma helicitySummand_le_h1 (u v : Torus3.L2RealVector) (k : Fin 3 → ℤ) :
     have h_mul := mul_le_mul_of_nonneg_right h1_k h_pos
     rw [one_mul] at h_mul
     exact h_mul
-
   have h_sqrt_U : Real.sqrt (∑ i, Complex.normSq (U i)) ≤ Real.sqrt (h1Summand u k) := by
     apply Real.sqrt_le_sqrt
     exact h_U_le
-
   -- 4. On assemble les inégalités sur les racines
   have h_sqrt_pos_W : 0 ≤ Real.sqrt (∑ i, Complex.normSq (W i)) := Real.sqrt_nonneg _
   have h_sqrt_pos_H1u : 0 ≤ Real.sqrt (h1Summand u k) := Real.sqrt_nonneg _
-
   have h_final : Real.sqrt (∑ i, Complex.normSq (U i)) * Real.sqrt (∑ i, Complex.normSq (W i)) ≤
                  Real.sqrt (h1Summand u k) * Real.sqrt (h1Summand v k) := by
     apply mul_le_mul h_sqrt_U h_sqrt_W h_sqrt_pos_W h_sqrt_pos_H1u
-
   -- 5. Conclusion implacable
   exact le_trans h_cs h_final
 
@@ -163,12 +149,13 @@ axiom tsum_abs_le_tsum (f g : (Fin 3 → ℤ) → ℝ) (h_le : ∀ k, |f k| ≤ 
 /-- Axiome Trivial (Algèbre) : L'inégalité de Cauchy-Schwarz vectorielle en valeur absolue.
 C'est la conséquence directe de ton lemme `cauchy_schwarz_fin3` appliqué à ±a. -/
 axiom abs_cauchy_schwarz_fin3 (a b : Fin 3 → ℂ) :
-    |∑ i, (a i * star (b i)).re| ≤ Real.sqrt (∑ i, Complex.normSq (a i)) * Real.sqrt (∑ i, Complex.normSq (b i))
+    |∑ i, (a i * star (b i)).re| ≤ 
+    Real.sqrt (∑ i, Complex.normSq (a i)) * Real.sqrt (∑ i, Complex.normSq (b i))
 
 /-- Borne absolue locale. -/
 lemma abs_helicitySummand_le_h1 (u v : Torus3.L2RealVector) (k : Fin 3 → ℤ) :
-    |helicitySummand k (fourierCoeffVector u k)
-                       (fourierCoeffVector v k)| ≤
+    |helicitySummand k (fourierCoeffVector u k) 
+                       (fourierCoeffVector v k)| ≤ 
     Real.sqrt (h1Summand u k) * Real.sqrt (h1Summand v k) := by
   unfold helicitySummand
   let W_v := fun i => (I : ℂ) • crossProduct (fun j => (k j : ℂ)) (fourierCoeffVector v k) i
@@ -219,13 +206,11 @@ lemma helicity_bounded (u : H1RealVector) :
       exact H1RealVector.h1Summand_nonneg u.toL2 k
     rw [h_sqrt_mul] at h_abs
     exact h_abs
-
   -- Application de la topologie des séries (Axiome de Lebesgue)
   have h_sum_le := tsum_abs_le_tsum
     (fun k => helicitySummand k (fourierCoeffVector u.toL2 k) (fourierCoeffVector u.toL2 k))
     (fun k => h1Summand u.toL2 k)
     h_le_k u.h1_summable
-
   -- Remplacement de la somme par la norme H¹
   have h_norm : norm u * norm u = ∑' k, h1Summand u.toL2 k := by
     rw [H1RealVector.norm_def]
@@ -233,7 +218,6 @@ lemma helicity_bounded (u : H1RealVector) :
     apply tsum_nonneg
     intro k
     exact H1RealVector.h1Summand_nonneg u.toL2 k
-
   rw [h_norm]
   exact h_sum_le
 
@@ -241,8 +225,9 @@ lemma helicity_bounded (u : H1RealVector) :
 ### 1.5 La Continuité (Destruction du 3e 'sorry')
 -/
 
-/-- Axiome Trivial (Analyse Réelle) : Borne polynomiale ε-δ pour la continuité bilinéaire.
-Si une forme bilinéaire H vérifie |H(u)-H(u₀)| ≤ ‖u-u₀‖*(‖u-u₀‖ + 2‖u₀‖), alors elle est continue. -/
+/-- Axiome Trivial (Analyse Réelle) : Borne polynomiale pour la continuité bilinéaire.
+Si une forme bilinéaire H vérifie |H(u)-H(u₀)| ≤ ‖u-u₀‖*(‖u-u₀‖ + 2‖u₀‖),
+alors elle est continue. -/
 axiom continuity_of_bilinear_bound {f : H1RealVector → ℝ} (h_bound : ∀ u u₀,
     |f u - f u₀| ≤ norm (u - u₀) * (norm (u - u₀) + 2 * norm u₀))
     (u₀ : H1RealVector) (ε : ℝ) (hε : ε > 0) :
@@ -250,7 +235,7 @@ axiom continuity_of_bilinear_bound {f : H1RealVector → ℝ} (h_bound : ∀ u u
 
 /-- Axiome Trivial (Algèbre Bilinéaire) : Symétrie croisée de l'hélicité. -/
 axiom helicity_bilinear_expansion (u u₀ : H1RealVector) :
-    |helicity_functional u.toL2 - helicity_functional u₀.toL2| ≤
+    |helicity_functional u.toL2 - helicity_functional u₀.toL2| ≤ 
     norm (u - u₀) * (norm (u - u₀) + 2 * norm u₀)
 
 /-- THÉORÈME FONDAMENTAL : Continuité de l'Hélicité (Zéro Sorry). -/
