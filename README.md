@@ -15,7 +15,7 @@ A proof regarding the global regularity of the 3D Navier-Stokes equations demand
     *   [Read the full manuscript here](https://doi.org/10.6084/m9.figshare.31465447)
 
 2.  **This Lean 4 Repository (The Logical Architecture):**
-    Formalizing decades of foundational harmonic analysis (e.g., Calderón-Zygmund theory, fractional Airy limits) from scratch in Lean 4 is currently beyond the scope of the mathlib library. Therefore, this repository focuses on the **formal verification of the topological and algebraic structure** of the proof. We isolate the highly specific analytical bounds derived in the manuscript as formal axioms. Lean 4 then rigorously verifies that *if* these continuous bounds hold, the logical synthesis—the discrete topology, the hypergraph connectivity, and the closure of the enstrophy equation—is absolute and mathematically flawless.
+    Formalizing decades of foundational harmonic analysis (e.g., Calderón-Zygmund theory, fractional Airy limits) from scratch in Lean 4 is currently beyond the scope of the mathlib library. Therefore, this repository focuses on the **formal verification of the topological and algebraic structure** of the proof. We isolate the highly specific analytical bounds derived in the manuscript as formal axioms. Lean 4 then rigorously verifies that *if* these continuous bounds hold, the logical synthesis the discrete topology, the hypergraph connectivity, and the closure of the enstrophy equation is absolute and mathematically flawless.
 
 ## What is Formally Verified in this Codebase?
 
@@ -23,7 +23,7 @@ This repository contains **zero `sorry`** statements in its logical synthesis. T
 
 *   **The Topological Algebra:** Formal definitions of the Biot-Savart operator in Fourier space, Helicity functionals, and Enstrophy bounds. We rigorously prove that the helicity of any finite Galerkin truncation is strictly bounded by the topological energy constraints.
 *   **The $\mathbb{Z}^3$ Hypergraph and Phase Rigidity:** The most critical dynamic threat to regularity is macroscopic phase-locking (coherent constructive interference). We formalize the discrete $\mathbb{Z}^3$ resonant triad hypergraph and verify that any synchronized state ($\dot{\Psi} = 0$) mathematically forces the additive Cauchy functional equation $f(p+q) = f(p) + f(q)$. Lean verifies that the only solution on this connected integer lattice is strictly linear.
-*   **Traveling Wave Dissipation:** We formally prove that the resulting rigid traveling wave profiles—dictated by the linear phase isomorphism—exhibit identically zero non-linear vortex stretching and monotonic viscous energy decay, making singular concentration impossible.
+*   **Traveling Wave Dissipation:** We formally prove that the resulting rigid traveling wave profiles dictated by the linear phase isomorphism exhibit identically zero non-linear vortex stretching and monotonic viscous energy decay, making singular concentration impossible.
 *   **Global Regularity Synthesis:** We assemble these geometric and algebraic constraints to formally verify that the fluid's $H^1$ norm cannot diverge in finite time under the established topological conditions.
 
 ## Project Structure
