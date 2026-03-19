@@ -6,6 +6,12 @@ Welcome to the formal verification repository for the **Simo-H Framework**, an a
 
 This project operates at the intersection of harmonic analysis, fluid topology, and formal verification. It aims to demonstrate that the mechanism of non-linear vortex stretching is structurally sub-critical, definitively precluding any finite-time singularity.
 
+## Interactive Web Documentation
+
+For reviewers who prefer to navigate the formal proofs without launching a local or cloud environment, the complete Lean 4 codebase is automatically compiled into an interactive HTML documentation. You can explore the theorems, definitions, and the dependency graph directly in your browser:
+
+* [Explore the Simo-H Formal Documentation](https://yveslandry363-beep.github.io/Navier-Stokes-Formalization/)
+
 ## The Epistemology of this Proof: Bridging Analysis and Formal Logic
 
 A proof regarding the global regularity of the 3D Navier-Stokes equations demands both profound analytical estimates (which are historically prone to subtle errors in dyadic summations) and an immaculate logical architecture. To meet this dual requirement, this work is structured into two inseparable components:
@@ -54,16 +60,18 @@ cd Navier-Stokes-Formalization
 lake exe cache get
 lake build
 
-## Zero-Friction Verification (One-Click Codespace)
-
+Zero-Friction Verification (One-Click Codespace)
 To facilitate peer review, you can verify the entire logical architecture and compile the proof directly in your browser without installing Lean 4 or any local dependencies.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yveslandry363-beep/Navier-Stokes-Formalization)
+Note: This repository utilizes GitHub Codespaces Prebuilds. The container is pre-warmed, meaning the Mathlib cache and the Lean compiler are already initialized in the background to ensure an instant, zero-wait review experience.
 
-**Instructions for Reviewers:**
+Instructions for Reviewers:
 1. Click the badge above to launch a pre-configured VS Code environment in your browser.
-2. Wait a few moments for the Lean 4 extension to load and the Mathlib cache to initialize (`lake exe cache get` runs automatically).
-3. Open a new terminal in the Codespace (`Ctrl+Shift+\``) and run the following command:
-   ```bash
-   lake build NavierStokes
+2. The environment will load instantly with all required dependencies pre-installed.
+3. Open a new terminal in the Codespace (`Ctrl+Shift+``) and run the following command: 
+
+
+```bash
+lake build NavierStokes
+
 4. The Lean 4 compiler will execute the full verification of the hypergraph connectivity, phase rigidity, and topological synthesis, confirming a strict zero sorry environment.

@@ -1,17 +1,15 @@
 {
-    "name": "Navier-Stokes Formalization (Lean 4)",
+    "name": "Navier-Stokes Formalization",
     "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "features": {
+        "ghcr.io/leanprover/devcontainer-features/lean4:1": {}
+    },
+    "postCreateCommand": "lake exe cache get && lake build NavierStokes",
     "customizations": {
         "vscode": {
             "extensions": [
                 "leanprover.lean4"
-            ],
-            "settings": {
-                "lean4.serverEnv": {
-                    "PATH": "${env:HOME}/.elan/bin:${env:PATH}"
-                }
-            }
+            ]
         }
-    },
-    "postCreateCommand": "curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y && . ~/.elan/env && lake exe cache get"
+    }
 }
