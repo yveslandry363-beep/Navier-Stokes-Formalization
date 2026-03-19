@@ -1,6 +1,6 @@
 # Formalization of the Simo-H Topological Framework for 3D Navier-Stokes Global Regularity
 
-[![Lean 4 Build](https://github.com/yveslandry363-beep/Navier-Stokes-Formalization/actions/workflows/lean.yml/badge.svg)](https://github.com/yveslandry363-beep/Navier-Stokes-Formalization/actions/workflows/lean.yml)
+[![Lean 4 Build](https://github.com/yveslandry363-beep/Navier-Stokes-Formalization/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/yveslandry363-beep/Navier-Stokes-Formalization/actions/workflows/lean.yml)
 
 Welcome to the formal verification repository for the **Simo-H Framework**, an analytical resolution of the 3D incompressible Navier-Stokes global regularity problem. 
 
@@ -12,10 +12,10 @@ A proof regarding the global regularity of the 3D Navier-Stokes equations demand
 
 1.  **The Analytical Manuscript (The Core Mathematics):** 
     The companion manuscript provides the explicit, human-readable derivations of the hard analysis. It details the geometric collapse of the non-linear advective force ($\beta \to 0$) forced by the conservation of global helicity ($H \neq 0$). It also contains the rigorous derivations of the restricted Hessian on the dyadic sphere, yielding the uniform Van der Corput oscillatory integration gain ($\gamma_j \le C \cdot 2^{-j/2}$) necessary to neutralize the critical Bernstein divergence.
-    *   [Read the full manuscript here](insert_link_to_pdf_or_arxiv_here)
+    *   [Read the full manuscript here](https://doi.org/10.6084/m9.figshare.31465447)
 
 2.  **This Lean 4 Repository (The Logical Architecture):**
-    Formalizing decades of foundational harmonic analysis (e.g., Calderón-Zygmund theory, fractional Airy limits) from scratch in Lean 4 is currently beyond the scope of the mathlib library. Therefore, this repository focuses on the **formal verification of the topological and algebraic structure** of the proof. We isolate the highly specific analytical bounds derived in the manuscript as formal axioms. Lean 4 then rigorously verifies that *if* these continuous bounds hold, the logical synthesis—the discrete topology, the hypergraph connectivity, and the closure of the enstrophy equation—is absolute and mathematically flawless.
+    Formalizing decades of foundational harmonic analysis (e.g., Calderón-Zygmund theory, fractional Airy limits) from scratch in Lean 4 is currently beyond the scope of the mathlib library. Therefore, this repository focuses on the **formal verification of the topological and algebraic structure** of the proof. We isolate the highly specific analytical bounds derived in the manuscript as formal axioms. Lean 4 then rigorously verifies that *if* these continuous bounds hold, the logical synthesis, the discrete topology, the hypergraph connectivity, and the closure of the enstrophy equation is absolute and mathematically flawless.
 
 ## What is Formally Verified in this Codebase?
 
@@ -23,7 +23,7 @@ This repository contains **zero `sorry`** statements in its logical synthesis. T
 
 *   **The Topological Algebra:** Formal definitions of the Biot-Savart operator in Fourier space, Helicity functionals, and Enstrophy bounds. We rigorously prove that the helicity of any finite Galerkin truncation is strictly bounded by the topological energy constraints.
 *   **The $\mathbb{Z}^3$ Hypergraph and Phase Rigidity:** The most critical dynamic threat to regularity is macroscopic phase-locking (coherent constructive interference). We formalize the discrete $\mathbb{Z}^3$ resonant triad hypergraph and verify that any synchronized state ($\dot{\Psi} = 0$) mathematically forces the additive Cauchy functional equation $f(p+q) = f(p) + f(q)$. Lean verifies that the only solution on this connected integer lattice is strictly linear.
-*   **Traveling Wave Dissipation:** We formally prove that the resulting rigid traveling wave profiles—dictated by the linear phase isomorphism—exhibit identically zero non-linear vortex stretching and monotonic viscous energy decay, making singular concentration impossible.
+*   **Traveling Wave Dissipation:** We formally prove that the resulting rigid traveling wave profiles dictated by the linear phase isomorphism exhibit identically zero non-linear vortex stretching and monotonic viscous energy decay, making singular concentration impossible.
 *   **Global Regularity Synthesis:** We assemble these geometric and algebraic constraints to formally verify that the fluid's $H^1$ norm cannot diverge in finite time under the established topological conditions.
 
 ## Project Structure
@@ -54,4 +54,16 @@ cd Navier-Stokes-Formalization
 lake exe cache get
 lake build
 
+## Zero-Friction Verification (One-Click Codespace)
 
+To facilitate peer review, you can verify the entire logical architecture and compile the proof directly in your browser without installing Lean 4 or any local dependencies.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/yveslandry363-beep/Navier-Stokes-Formalization)
+
+**Instructions for Reviewers:**
+1. Click the badge above to launch a pre-configured VS Code environment in your browser.
+2. Wait a few moments for the Lean 4 extension to load and the Mathlib cache to initialize (`lake exe cache get` runs automatically).
+3. Open a new terminal in the Codespace (`Ctrl+Shift+\``) and run the following command:
+   ```bash
+   lake build NavierStokes
+4. The Lean 4 compiler will execute the full verification of the hypergraph connectivity, phase rigidity, and topological synthesis, confirming a strict zero sorry environment.
