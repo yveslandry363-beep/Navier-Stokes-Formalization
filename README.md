@@ -12,7 +12,7 @@ A proof regarding the global regularity of the 3D Navier-Stokes equations demand
 
 1.  **The Analytical Manuscript (The Core Mathematics):** 
     The companion manuscript provides the explicit, human-readable derivations of the hard analysis. It details the geometric collapse of the non-linear advective force ($\beta \to 0$) forced by the conservation of global helicity ($H \neq 0$). It also contains the rigorous derivations of the restricted Hessian on the dyadic sphere, yielding the uniform Van der Corput oscillatory integration gain ($\gamma_j \le C \cdot 2^{-j/2}$) necessary to neutralize the critical Bernstein divergence.
-    *   [Read the full manuscript here](insert_link_to_pdf_or_arxiv_here)
+    *   [Read the full manuscript here](https://doi.org/10.6084/m9.figshare.31465447)
 
 2.  **This Lean 4 Repository (The Logical Architecture):**
     Formalizing decades of foundational harmonic analysis (e.g., Calderón-Zygmund theory, fractional Airy limits) from scratch in Lean 4 is currently beyond the scope of the mathlib library. Therefore, this repository focuses on the **formal verification of the topological and algebraic structure** of the proof. We isolate the highly specific analytical bounds derived in the manuscript as formal axioms. Lean 4 then rigorously verifies that *if* these continuous bounds hold, the logical synthesis—the discrete topology, the hypergraph connectivity, and the closure of the enstrophy equation—is absolute and mathematically flawless.
