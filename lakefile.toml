@@ -16,7 +16,7 @@ rev = "v4.28.0"
 
 # L'ajout magique pour générer le site web interactif
 [[require]]
-name = "«doc-gen4»"
+name = "doc-gen4"
 git = "https://github.com/leanprover/doc-gen4"
 rev = "main"
 
