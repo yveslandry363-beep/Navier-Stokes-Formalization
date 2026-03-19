@@ -1,0 +1,59 @@
+name: Lean Action CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Permet de relancer le build manuellement au cas où
+
+# C'EST ICI LA CLÉ : Le laissez-passer de sécurité pour publier sur GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: Get Mathlib Cache
+        run: |
+          lake exe cache get || true
+
+      - name: Build Project (Vérification mathématique)
+        run: |
+          lake build NavierStokes
+
+      - name: Build Documentation (Génération du site web)
+        run: |
+          lake build NavierStokes:docs
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact (Préparation des fichiers web)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.lake/build/doc'
+
+  # Nouveau Job séparé pour déployer le site web uniquement sur la branche main
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages (Publication en ligne)
+        id: deployment
+        uses: actions/deploy-pages@v4
