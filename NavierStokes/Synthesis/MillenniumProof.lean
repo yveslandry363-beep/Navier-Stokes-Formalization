@@ -1,5 +1,6 @@
 import NavierStokes.Foundations.Sobolev
 import NavierStokes.Physics.Helicity
+import NavierStokes.Physics.NavierStokesEq
 import NavierStokes.Geometry.AutoLinearization
 import NavierStokes.Foundations.Operators
 import NavierStokes.Synthesis.BonyClosure
@@ -174,5 +175,40 @@ theorem simoH_infinite_order_application
       ∧ isDivFree (stokes_limit_solution u0 1 t) := by
   refine ⟨simoH_infinite_order_converges t, simoH_term_tendsto_zero_nat t, ?_⟩
   exact stokes_limit_solution_divFree u0 1 t
+
+/-!
+Checklist formel des briques encore nécessaires pour une certification
+inconditionnelle complète de Navier-Stokes 3D dans ce cadre.
+-/
+
+structure UnconditionalClosureHypotheses (u0 : Index3 → Fin 3 → ℂ) (ν : ℝ) : Prop where
+  nu_pos : 0 < ν
+  nonlinear_collapse :
+    ∀ t k j,
+      NavierStokesEq.convectionOperator
+          (stokes_limit_solution u0 ν t)
+          (stokes_limit_solution u0 ν t) k j = 0
+  duhamel_uniqueness :
+    ∀ flow : NavierStokesEq.NavierStokesFlow,
+      flow.nu = ν →
+      (∀ k i, flow.u 0 k i = spectralLeray u0 k i) →
+      (∀ t k j,
+        NavierStokesEq.convectionOperator (flow.u t) (flow.u t) k j = 0) →
+      flow.u = fun t => stokes_limit_solution u0 ν t
+
+theorem strong_solution_blueprint_of_closure
+    (u0 : Index3 → Fin 3 → ℂ) (ν t : ℝ)
+    (hclose : UnconditionalClosureHypotheses u0 ν) :
+    Summable (simoH_term t)
+      ∧ Tendsto (fun n : ℕ => simoH_term t n) atTop (nhds 0)
+      ∧ isDivFree (stokes_limit_solution u0 ν t)
+      ∧ (∀ k j,
+          NavierStokesEq.convectionOperator
+            (stokes_limit_solution u0 ν t)
+            (stokes_limit_solution u0 ν t) k j = 0) := by
+  refine ⟨simoH_infinite_order_converges t, simoH_term_tendsto_zero_nat t, ?_, ?_⟩
+  · exact stokes_limit_solution_divFree u0 ν t
+  · intro k j
+    exact hclose.nonlinear_collapse t k j
 
 end MillenniumProof
