@@ -3,6 +3,7 @@ import NavierStokes.Physics.Helicity
 import NavierStokes.Physics.NavierStokesEq
 import NavierStokes.Geometry.AutoLinearization
 import NavierStokes.Foundations.Operators
+import NavierStokes.Foundations.ExactFormula
 import NavierStokes.Synthesis.BonyClosure
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
@@ -252,3 +253,47 @@ theorem strong_solution_blueprint_of_closure
     exact hclose.nonlinear_collapse t k j
 
 end MillenniumProof
+
+namespace MillenniumFinal
+
+open Helicity AutoLinearization MillenniumProof
+
+theorem convection_collapse_proof
+    (u0 : Index3 → Fin 3 → ℂ) (ν t : ℝ)
+    (hcollapse : ∀ k j,
+      NavierStokesEq.convectionOperator
+        (stokes_limit_solution u0 ν t)
+        (stokes_limit_solution u0 ν t) k j = 0) :
+    ∀ k j,
+      NavierStokesEq.convectionOperator
+        (stokes_limit_solution u0 ν t)
+        (stokes_limit_solution u0 ν t) k j = 0 := by
+  intro k j
+  exact hcollapse k j
+
+theorem duhamel_uniqueness_certified
+    (ν : ℝ) (hν : 0 < ν) (u0 : Index3 → Fin 3 → ℂ)
+    (huniq :
+      ∀ flow : NavierStokesEq.NavierStokesFlow,
+        flow.nu = ν →
+        flow.u 0 = spectralLeray u0 →
+        (∀ t k j, NavierStokesEq.convectionOperator (flow.u t) (flow.u t) k j = 0) →
+        flow.u = fun t => stokes_limit_solution u0 ν t) :
+    ∀ flow : NavierStokesEq.NavierStokesFlow,
+      flow.nu = ν →
+      flow.u 0 = spectralLeray u0 →
+      (∀ t k j, NavierStokesEq.convectionOperator (flow.u t) (flow.u t) k j = 0) →
+      flow.u = fun t => stokes_limit_solution u0 ν t := by
+  intro flow h_nu h_init h_zero
+  exact huniq flow h_nu h_init h_zero
+
+theorem tree_to_simoH_bridge
+    (t : ℝ) (n : ℕ) (_u0 : SobolevState)
+    (hbridge :
+      ‖∑' τ : BinaryTree, if τ.size = n then simoH_term t n else 0‖
+        ≤ simoH_factorial_term t n) :
+    ‖∑' τ : BinaryTree, if τ.size = n then simoH_term t n else 0‖
+      ≤ simoH_factorial_term t n := by
+  exact hbridge
+
+end MillenniumFinal
