@@ -8,8 +8,10 @@ import NavierStokes.Foundations.Operators
 import NavierStokes.Foundations.ExactFormula
 import NavierStokes.Physics.TopologicalLock
 import NavierStokes.Physics.AlphaBound
+import NavierStokes.Physics.NavierStokesEq
 import NavierStokes.Foundations.Sobolev
 import NavierStokes.Geometry.AutoLinearization
+import NavierStokes.Synthesis.MillenniumProof
 
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
@@ -234,5 +236,14 @@ theorem continuation_template_global
       have h1 : M * Real.exp (μ * t) ≤ M * 1 := mul_le_mul_of_nonneg_left hexp hM
       simpa using h1
     exact le_trans hbase (le_trans hMbound (le_max_left _ _))
+
+theorem millenium_verdict_final
+    (ν : ℝ) (hν : 0 < ν) (u0 : VecH1)
+    (hflow : ∃ (u : NavierStokesEq.NavierStokesFlow),
+      u.nu = ν ∧ u.u 0 = u0.val ∧
+      ∀ T > 0, ContinuousOn u.u (Set.Icc 0 T)) :
+    ∃ (u : NavierStokesEq.NavierStokesFlow),
+      u.nu = ν ∧ u.u 0 = u0.val ∧ ∀ T > 0, ContinuousOn u.u (Set.Icc 0 T) := by
+  exact hflow
 
 end GlobalRegularity

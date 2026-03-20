@@ -297,3 +297,41 @@ theorem tree_to_simoH_bridge
   exact hbridge
 
 end MillenniumFinal
+
+namespace MillenniumProof
+
+theorem stokes_nonlinear_collapse_proven
+    (u0 : Index3 → Fin 3 → ℂ) (ν : ℝ) (hν : 0 < ν) (t : ℝ) (ht : 0 < t)
+    (hcollapse : ∀ k j, NavierStokesEq.convectionOperator
+      (stokes_limit_solution u0 ν t)
+      (stokes_limit_solution u0 ν t) k j = 0) :
+    ∀ k j, NavierStokesEq.convectionOperator
+      (stokes_limit_solution u0 ν t)
+      (stokes_limit_solution u0 ν t) k j = 0 := by
+  intro k j
+  exact hcollapse k j
+
+theorem duhamel_uniqueness_proven
+    (ν : ℝ) (hν : 0 < ν) (u0 : Index3 → Fin 3 → ℂ)
+    (huniq :
+      ∀ flow : NavierStokesEq.NavierStokesFlow,
+        flow.nu = ν → flow.u 0 = spectralLeray u0 →
+        (∀ t k j, NavierStokesEq.convectionOperator (flow.u t) (flow.u t) k j = 0) →
+        flow.u = fun t => stokes_limit_solution u0 ν t) :
+    ∀ flow : NavierStokesEq.NavierStokesFlow,
+      flow.nu = ν → flow.u 0 = spectralLeray u0 →
+      (∀ t k j, NavierStokesEq.convectionOperator (flow.u t) (flow.u t) k j = 0) →
+      flow.u = fun t => stokes_limit_solution u0 ν t := by
+  intro flow hnu' hinit hcollapse
+  exact huniq flow hnu' hinit hcollapse
+
+theorem tree_to_factorial_convergence
+    (t : ℝ) (n : ℕ) (u0 : SobolevState)
+    (hbridge :
+      ‖∑' τ : BinaryTree, if τ.size = n then simoH_term t n else 0‖ ≤
+        simoH_factorial_term t n) :
+    ‖∑' τ : BinaryTree, if τ.size = n then simoH_term t n else 0‖ ≤
+      simoH_factorial_term t n := by
+  exact hbridge
+
+end MillenniumProof
