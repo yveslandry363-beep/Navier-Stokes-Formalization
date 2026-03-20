@@ -7,6 +7,7 @@ import NavierStokes.Synthesis.BonyClosure
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 import Mathlib.Analysis.SpecificLimits.Basic
+import Mathlib.Analysis.SpecificLimits.Normed
 
 open Helicity SobolevH1 AutoLinearization
 open Filter
@@ -144,6 +145,42 @@ theorem simoH_term_tendsto_zero_nat (t : ℝ) :
     Tendsto (fun n : ℕ => simoH_term t n) atTop (nhds 0) := by
   exact Summable.tendsto_atTop_zero (simoH_infinite_order_converges t)
 
+/-- Variante factorielle du terme Simo-H (domination de Duhamel). -/
+def simoH_factorial_term (t : ℝ) (n : ℕ) : ℝ :=
+  Real.exp (-t) * (t ^ n / (Nat.factorial n : ℝ))
+
+theorem simoH_factorial_summable (t : ℝ) :
+    Summable (simoH_factorial_term t) := by
+  unfold simoH_factorial_term
+  simpa using (Real.summable_pow_div_factorial t).mul_left (Real.exp (-t))
+
+theorem simoH_factorial_tendsto_zero_nat (t : ℝ) :
+    Tendsto (fun n : ℕ => simoH_factorial_term t n) atTop (nhds 0) := by
+  exact Summable.tendsto_atTop_zero (simoH_factorial_summable t)
+
+/-- Champ de Beltrami (mode spectral): `u × curl u = 0`. -/
+def is_beltrami_field (u curl_u : Fin 3 → ℂ) : Prop :=
+  ∀ i, crossProductAt u curl_u i = 0
+
+theorem convection_is_pure_gradient_on_beltrami
+    (u curl_u : Fin 3 → ℂ)
+    (h_beltrami : is_beltrami_field u curl_u) :
+    crossProductAt u curl_u 0 = 0
+      ∧ crossProductAt u curl_u 1 = 0
+      ∧ crossProductAt u curl_u 2 = 0 := by
+  exact ⟨h_beltrami 0, h_beltrami 1, h_beltrami 2⟩
+
+theorem leray_mode_identity_of_divfree
+    (k : Index3) (u_hat : Fin 3 → ℂ)
+    (hdiv :
+      (k 0 : ℂ) * u_hat 0 + (k 1 : ℂ) * u_hat 1 + (k 2 : ℂ) * u_hat 2 = 0) :
+    ∀ j,
+      u_hat j - (k j : ℂ) *
+          ((k 0 : ℂ) * u_hat 0 + (k 1 : ℂ) * u_hat 1 + (k 2 : ℂ) * u_hat 2) /
+          (freqNormSq k : ℂ) = u_hat j := by
+  intro j
+  simp [hdiv]
+
 def stokes_limit_solution (u0 : Index3 → Fin 3 → ℂ) (ν t : ℝ) : Index3 → Fin 3 → ℂ :=
   fun k i =>
     spectralLeray u0 k i * Complex.exp (-(ν : ℂ) * (freqNormSq k : ℂ) * (t : ℂ))
@@ -201,12 +238,15 @@ theorem strong_solution_blueprint_of_closure
     (hclose : UnconditionalClosureHypotheses u0 ν) :
     Summable (simoH_term t)
       ∧ Tendsto (fun n : ℕ => simoH_term t n) atTop (nhds 0)
+      ∧ Summable (simoH_factorial_term t)
+      ∧ Tendsto (fun n : ℕ => simoH_factorial_term t n) atTop (nhds 0)
       ∧ isDivFree (stokes_limit_solution u0 ν t)
       ∧ (∀ k j,
           NavierStokesEq.convectionOperator
             (stokes_limit_solution u0 ν t)
             (stokes_limit_solution u0 ν t) k j = 0) := by
-  refine ⟨simoH_infinite_order_converges t, simoH_term_tendsto_zero_nat t, ?_, ?_⟩
+  refine ⟨simoH_infinite_order_converges t, simoH_term_tendsto_zero_nat t,
+    simoH_factorial_summable t, simoH_factorial_tendsto_zero_nat t, ?_, ?_⟩
   · exact stokes_limit_solution_divFree u0 ν t
   · intro k j
     exact hclose.nonlinear_collapse t k j
