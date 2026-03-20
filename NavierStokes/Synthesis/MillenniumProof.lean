@@ -2,8 +2,10 @@ import NavierStokes.Foundations.Sobolev
 import NavierStokes.Physics.Helicity
 import NavierStokes.Geometry.AutoLinearization
 import NavierStokes.Foundations.Operators
+import NavierStokes.Synthesis.BonyClosure
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+import Mathlib.Analysis.SpecificLimits.Basic
 
 open Helicity SobolevH1 AutoLinearization
 open Filter
@@ -112,5 +114,65 @@ theorem asymptotic_stability_dissipative
   simpa using
     ((tendsto_const_nhds : Tendsto (fun _ : ℝ => A) atTop (nhds A)).mul
       (damped_secular_term_tendsto_zero n μ hμ))
+
+/-!
+Application Simo-H à l'ordre infini:
+convergence de série, extinction du terme général,
+et formule limite de type Stokes en Fourier.
+-/
+
+def simoH_term (t : ℝ) (n : ℕ) : ℝ :=
+  Real.exp (-t) * ((1 / Real.sqrt 2 : ℝ) ^ n)
+
+lemma simoH_ratio_nonneg : 0 ≤ (1 / Real.sqrt 2 : ℝ) := by
+  positivity
+
+lemma simoH_ratio_lt_one : (1 / Real.sqrt 2 : ℝ) < 1 := by
+  exact BonyClosure.vdc_ratio_lt_one
+
+theorem simoH_geometric_summable :
+    Summable (fun n : ℕ => (1 / Real.sqrt 2 : ℝ) ^ n) := by
+  exact summable_geometric_of_lt_one simoH_ratio_nonneg simoH_ratio_lt_one
+
+theorem simoH_infinite_order_converges (t : ℝ) :
+    Summable (simoH_term t) := by
+  unfold simoH_term
+  simpa using (simoH_geometric_summable.mul_left (Real.exp (-t)))
+
+theorem simoH_term_tendsto_zero_nat (t : ℝ) :
+    Tendsto (fun n : ℕ => simoH_term t n) atTop (nhds 0) := by
+  exact Summable.tendsto_atTop_zero (simoH_infinite_order_converges t)
+
+def stokes_limit_solution (u0 : Index3 → Fin 3 → ℂ) (ν t : ℝ) : Index3 → Fin 3 → ℂ :=
+  fun k i =>
+    spectralLeray u0 k i * Complex.exp (-(ν : ℂ) * (freqNormSq k : ℂ) * (t : ℂ))
+
+theorem stokes_limit_solution_divFree (u0 : Index3 → Fin 3 → ℂ) (ν t : ℝ) :
+    isDivFree (stokes_limit_solution u0 ν t) := by
+  intro k
+  have hL :
+      (k 0 : ℂ) * spectralLeray u0 k 0
+        + (k 1 : ℂ) * spectralLeray u0 k 1
+        + (k 2 : ℂ) * spectralLeray u0 k 2 = 0 :=
+    spectralLeray_divFree u0 k
+  set c : ℂ := Complex.exp (-(ν : ℂ) * (freqNormSq k : ℂ) * (t : ℂ))
+  calc
+    (k 0 : ℂ) * stokes_limit_solution u0 ν t k 0
+        + (k 1 : ℂ) * stokes_limit_solution u0 ν t k 1
+        + (k 2 : ℂ) * stokes_limit_solution u0 ν t k 2
+        = ((k 0 : ℂ) * spectralLeray u0 k 0
+            + (k 1 : ℂ) * spectralLeray u0 k 1
+            + (k 2 : ℂ) * spectralLeray u0 k 2) * c := by
+          simp [stokes_limit_solution, c]
+          ring
+    _ = 0 := by simp [hL]
+
+theorem simoH_infinite_order_application
+    (u0 : Index3 → Fin 3 → ℂ) (t : ℝ) :
+    Summable (simoH_term t)
+      ∧ Tendsto (fun n : ℕ => simoH_term t n) atTop (nhds 0)
+      ∧ isDivFree (stokes_limit_solution u0 1 t) := by
+  refine ⟨simoH_infinite_order_converges t, simoH_term_tendsto_zero_nat t, ?_⟩
+  exact stokes_limit_solution_divFree u0 1 t
 
 end MillenniumProof
