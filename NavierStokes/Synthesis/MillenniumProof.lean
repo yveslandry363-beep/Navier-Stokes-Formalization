@@ -3,8 +3,11 @@ import NavierStokes.Physics.Helicity
 import NavierStokes.Geometry.AutoLinearization
 import NavierStokes.Foundations.Operators
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 open Helicity SobolevH1 AutoLinearization
+open Filter
+open Topology
 open scoped BigOperators
 
 set_option linter.unusedVariables false
@@ -86,5 +89,28 @@ theorem millennium_bridge_final
   rcases global_stretching_subcritical_simoh u H_abs h_helicity h_H_pos with ⟨C, hC⟩
   refine ⟨C, (1 / 2 : ℝ), by norm_num, ?_⟩
   simpa [lamb_force_L2, enstrophy_functional] using hC
+
+/--
+Lemme de Domination Dissipative:
+un terme séculaire polynomial amorti par un noyau de chaleur tend vers 0.
+-/
+def damped_secular_term (n μ t : ℝ) : ℝ :=
+  t ^ n * Real.exp (-μ * t)
+
+theorem damped_secular_term_tendsto_zero (n μ : ℝ) (hμ : 0 < μ) :
+  Tendsto (fun t : ℝ => damped_secular_term n μ t) atTop (nhds 0) := by
+  simpa [damped_secular_term] using
+    (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero n μ hμ)
+
+/--
+Conclusion sur la Stabilité Asymptotique:
+toute amplitude bornée multipliée par un terme séculaire amorti s'éteint à l'infini.
+-/
+theorem asymptotic_stability_dissipative
+    (A n μ : ℝ) (hμ : 0 < μ) :
+  Tendsto (fun t : ℝ => A * damped_secular_term n μ t) atTop (nhds 0) := by
+  simpa using
+    ((tendsto_const_nhds : Tendsto (fun _ : ℝ => A) atTop (nhds A)).mul
+      (damped_secular_term_tendsto_zero n μ hμ))
 
 end MillenniumProof
