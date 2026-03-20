@@ -10,3 +10,4 @@ import NavierStokes.Spectral.HessianDegeneracy
 import NavierStokes.Spectral.WaleffeBasis
 import NavierStokes.Synthesis.BonyClosure
 import NavierStokes.Synthesis.GlobalRegularity
+import NavierStokes.Synthesis.MillenniumProof
