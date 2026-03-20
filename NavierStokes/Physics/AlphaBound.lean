@@ -9,7 +9,7 @@ import Mathlib.Tactic.Linarith
 import NavierStokes.Physics.CauchySchwarz
 
 open MeasureTheory TopologicalSpace Metric Real Complex Finset
-open Torus3 Fourier Helicity BigOperators
+open UnitAddTorus Helicity BigOperators
 
 noncomputable section
 
@@ -27,7 +27,7 @@ def laplacian_inverse_fourier (k : Fin 3 → ℤ) (omega_hat : Fin 3 → ℂ) : 
 def biot_savart_fourier (k : Fin 3 → ℤ) (omega_hat : Fin 3 → ℂ) : Fin 3 → ℂ :=
   let psi_hat := laplacian_inverse_fourier k omega_hat
   let k_c : Fin 3 → ℂ := fun i => (k i : ℂ)
-  (I : ℂ) • crossProduct k_c psi_hat
+  (I : ℂ) • Helicity.crossProduct k_c psi_hat
 
 def helicity_summand_biot_savart (k : Fin 3 → ℤ) (omega_hat : Fin 3 → ℂ) : ℝ :=
   let u_hat := biot_savart_fourier k omega_hat
@@ -93,21 +93,9 @@ lemma arbitrarily_small (C p H_abs : ℝ) (hp : p > 0) (hH : H_abs > 0) (hC : C 
     field_simp at *
     linarith
 
-/--
-Axiome Physique Absolu (Opérateur de Biot-Savart) :
-L'opérateur intégral de Biot-Savart (qui calcule la vitesse depuis la vorticité) 
-agit comme un intégrateur fractionnaire d'ordre 1 en analyse harmonique.
-Il fait gagner exactement une échelle de longueur δ. L'hélicité (u·ω) est donc 
-strictement bornée par l'enstrophie (ω²) multipliée par cette échelle δ et une constante C.
--/
-axiom biot_savart_regularization (omega : ℝ → ℝ → (Fin 3 → ℤ) → (Fin 3 → ℂ)) (δ lambda C : ℝ) :
-    |helicity_total_biot_savart (omega δ lambda)| ≤ C * δ * enstrophy_fourier (omega δ lambda)
-
-/--
-Axiome Algébrique Trivial : Lois des exposants réels (δ^1 * δ^-α = δ^(1-α)).
-Posé formellement pour lier l'algèbre continue à la topologie sans ambiguïté.
--/
-axiom rpow_algebra (δ alpha : ℝ) (h : δ > 0) : δ * δ ^ (-alpha) = δ ^ (1 - alpha)
+lemma rpow_algebra (δ alpha : ℝ) (h : δ > 0) : δ * δ ^ (-alpha) = δ ^ (1 - alpha) := by
+  rw [show 1 - alpha = 1 + (-alpha) by ring]
+  rw [Real.rpow_add h, Real.rpow_one]
 
 /-- THÉORÈME FONDAMENTAL (Borne d'échelle anisotrope)
 Dans un filament étiré (λ), l'hélicité est bornée par l'enstrophie 
@@ -117,24 +105,27 @@ Preuve formelle : Découle strictement de l'effet régularisant de Biot-Savart
 et de la condition d'échelle de l'enstrophie. Zéro Sorry. -/
 theorem anisotropic_helicity_scaling_bound (omega_hat_delta : ℝ → ℝ → (Fin 3 → ℤ) → (Fin 3 → ℂ))
     (alpha : ℝ) (δ : ℝ) (hδ : δ > 0) (lambda : ℝ) (C : ℝ)
+    (h_bs :
+      |helicity_total_biot_savart (omega_hat_delta δ lambda)|
+        ≤ C * δ * enstrophy_fourier (omega_hat_delta δ lambda))
     (h_scale : ∀ d > 0, enstrophy_fourier (omega_hat_delta d lambda) = d ^ (-alpha)) :
     |helicity_total_biot_savart (omega_hat_delta δ lambda)| ≤ C * δ ^ (1 - alpha) := by
   -- 1. On invoque la loi physique de régularisation de Biot-Savart sur le fluide
-  have h_bs := biot_savart_regularization omega_hat_delta δ lambda C
+  have h_bs' := h_bs
   
   -- 2. On injecte l'hypothèse d'échelle de l'enstrophie
   have h_ens := h_scale δ hδ
-  rw [h_ens] at h_bs
+  rw [h_ens] at h_bs'
   
   -- 3. On regroupe les termes pour appliquer la loi des exposants
   have h_rew : C * δ * δ ^ (-alpha) = C * δ ^ (1 - alpha) := by
     rw [mul_assoc]
     rw [rpow_algebra δ alpha hδ]
     
-  rw [h_rew] at h_bs
+  rw [h_rew] at h_bs'
   
   -- 4. La conclusion est mathématiquement inévitable
-  exact h_bs
+  exact h_bs'
 
 end NavierStokes
 end

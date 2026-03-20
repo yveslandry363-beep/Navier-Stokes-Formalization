@@ -1,11 +1,6 @@
 import NavierStokes.Basic
 import NavierStokes.Combinatorics.CauchyFunctional
 import NavierStokes.Combinatorics.HypergraphZ3
-import NavierStokes.Foundation.FunctionalSpaces
-import NavierStokes.Foundation.LittlewoodPaley
-import NavierStokes.Foundation.SingularIntegrals
-import NavierStokes.Foundation.TorusMath
-import NavierStokes.Foundation.VanDerCorput
 import NavierStokes.Geometry.AutoLinearization
 import NavierStokes.Physics.AlphaBound
 import NavierStokes.Physics.Helicity

@@ -13,18 +13,22 @@ namespace TestGlobalRegularity
 
 section TestHelicityTopology
 
-variable {FluidSpace : Type} [MetricSpace FluidSpace]
-variable (helicity_functional : FluidSpace → ℝ)
-variable (helicity_continuous : Continuous helicity_functional)
-variable (helicity_perturbation :
-  ∀ (u : FluidSpace) (ε : ℝ), ε > 0 → ∃ v : FluidSpace, dist u v < ε ∧ helicity_functional v ≠ 0)
+def H_zero_set {FluidSpace : Type} [MetricSpace FluidSpace]
+    (helicity_functional : FluidSpace → ℝ) : Set FluidSpace :=
+  { u | helicity_functional u = 0 }
 
-def H_zero_set : Set FluidSpace := { u | helicity_functional u = 0 }
-
-lemma H_zero_is_closed : IsClosed (H_zero_set helicity_functional) :=
+lemma H_zero_is_closed {FluidSpace : Type} [MetricSpace FluidSpace]
+    (helicity_functional : FluidSpace → ℝ)
+    (helicity_continuous : Continuous helicity_functional) :
+    IsClosed (H_zero_set helicity_functional) :=
   isClosed_eq helicity_continuous continuous_const
 
-lemma H_zero_empty_interior : interior (H_zero_set helicity_functional) = ∅ := by
+lemma H_zero_empty_interior {FluidSpace : Type} [MetricSpace FluidSpace]
+    (helicity_functional : FluidSpace → ℝ)
+    (helicity_perturbation :
+      ∀ (u : FluidSpace) (ε : ℝ), ε > 0 →
+        ∃ v : FluidSpace, dist u v < ε ∧ helicity_functional v ≠ 0) :
+    interior (H_zero_set helicity_functional) = ∅ := by
   ext u
   refine ⟨fun hu => ?_, fun h => h.elim⟩
   rcases mem_interior.mp hu with ⟨s, hs_subset, hs_open, hu_s⟩
@@ -33,10 +37,18 @@ lemma H_zero_empty_interior : interior (H_zero_set helicity_functional) = ∅ :=
   have hv_in_s : v ∈ s := hball (by rw [mem_ball, dist_comm]; exact hv_dist)
   exact hv_helicity (hs_subset hv_in_s)
 
-theorem H_nonzero_is_open : IsOpen (H_zero_set helicity_functional)ᶜ :=
+theorem H_nonzero_is_open {FluidSpace : Type} [MetricSpace FluidSpace]
+    (helicity_functional : FluidSpace → ℝ)
+    (helicity_continuous : Continuous helicity_functional) :
+    IsOpen (H_zero_set helicity_functional)ᶜ :=
   isOpen_compl_iff.mpr (H_zero_is_closed helicity_functional helicity_continuous)
 
-theorem H_nonzero_is_dense : Dense (H_zero_set helicity_functional)ᶜ :=
+theorem H_nonzero_is_dense {FluidSpace : Type} [MetricSpace FluidSpace]
+    (helicity_functional : FluidSpace → ℝ)
+    (helicity_perturbation :
+      ∀ (u : FluidSpace) (ε : ℝ), ε > 0 →
+        ∃ v : FluidSpace, dist u v < ε ∧ helicity_functional v ≠ 0) :
+    Dense (H_zero_set helicity_functional)ᶜ :=
   (interior_eq_empty_iff_dense_compl (s := H_zero_set helicity_functional)).mp
     (H_zero_empty_interior helicity_functional helicity_perturbation)
 

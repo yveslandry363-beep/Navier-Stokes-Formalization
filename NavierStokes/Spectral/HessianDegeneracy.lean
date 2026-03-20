@@ -1,8 +1,6 @@
 import NavierStokes.Spectral.WaleffeBasis
-import NavierStokes.Foundation.VanDerCorput
 
-open SpectralDynamics VanDerCorput
-open Torus3
+open SpectralDynamics
 
 noncomputable section
 

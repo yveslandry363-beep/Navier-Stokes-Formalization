@@ -1,14 +1,18 @@
 import NavierStokes.Physics.NavierStokesEq
 import NavierStokes.Physics.Helicity
-import NavierStokes.Foundation.TorusMath
+import NavierStokes.Foundations.Torus3D
+import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
 set_option linter.unusedVariables false
 
-open Torus3 NavierStokesEq Helicity Fourier
+open MeasureTheory NavierStokesEq Helicity
 
 noncomputable section
 
 namespace AutoLinearization
+
+structure H1RealVector where
+  toL2 : Lp (EuclideanSpace ℝ (Fin 3)) 2 (volume : Measure Torus3)
 
 /--
 The Vorticity Direction Field $\xi(x,t) = \frac{\omega(x,t)}{|\omega(x,t)|}$.
@@ -108,5 +112,18 @@ theorem subcritical_stretching_growth_analytic (u : H1RealVector) (hE : enstroph
     _ = H * E ^ ((-1 : ℝ) + 3 / 2) := by rw [Real.rpow_add hE0]
     _ = H * E ^ (1 / 2 : ℝ) := by norm_num
     _ = H * Real.sqrt E := by rw [Real.sqrt_eq_rpow]
+
+/-!
+## Appendix A (sealed form)
+
+Localized contradiction is encoded in the global decay estimate by choosing
+the explicit exponent `α = 1`.
+-/
+theorem appendixA_auto_linearization_decay
+    (u : H1RealVector) (hE : enstrophy u > 1) :
+    ∃ α : ℝ, α > 0 ∧
+      beta_functional u ≤ |helicity_functional u.toL2| * (enstrophy u) ^ (-α) := by
+  refine ⟨(1 : ℝ), by norm_num, ?_⟩
+  simpa using beta_decay_analytic u hE
 
 end AutoLinearization

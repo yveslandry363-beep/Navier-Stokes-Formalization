@@ -1,11 +1,14 @@
 import Mathlib.Topology.Basic
+import Mathlib.Algebra.Ring.GeomSum
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Data.Real.Sqrt
+import Mathlib.Tactic
 open Real
 
 
 noncomputable section
+open scoped BigOperators
 
 namespace BonyClosure
 
@@ -66,5 +69,87 @@ structure BonyClosureTheorem (alpha : ℝ) where
     alpha ≥ 1 →
     paraproduct_operator_bounded
 
+/-- Concrete Van der Corput dyadic gain. -/
+def vdc_gain (j : ℕ) : ℝ := (1 / Real.sqrt 2) ^ j
+
+/-- Pointwise dyadic interaction majoration. -/
+def dyadic_interaction_bound (interaction : ℕ → ℝ) (C : ℝ) : Prop :=
+  ∀ j, interaction j ≤ C * vdc_gain j
+
+lemma vdc_gain_nonneg (j : ℕ) : 0 ≤ vdc_gain j := by
+  unfold vdc_gain
+  positivity
+
+lemma vdc_ratio_lt_one : 1 / Real.sqrt 2 < 1 := by
+  rw [div_lt_one (Real.sqrt_pos.mpr (by norm_num))]
+  have h1 : (1 : ℝ) = Real.sqrt 1 := Real.sqrt_one.symm
+  rw [h1]
+  exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+
+lemma vdc_ratio_ne_one : 1 / Real.sqrt 2 ≠ 1 := ne_of_lt vdc_ratio_lt_one
+
+lemma vdc_gain_geometric_sum_formula (N : ℕ) :
+    Finset.sum (Finset.range N) (fun j => vdc_gain j) =
+      (1 - (1 / Real.sqrt 2) ^ N) / (1 - 1 / Real.sqrt 2) := by
+  let r : ℝ := 1 / Real.sqrt 2
+  have hr : r = 1 / Real.sqrt 2 := rfl
+  have hmul : (Finset.sum (Finset.range N) (fun j => r ^ j)) * (1 - r) = 1 - r ^ N := by
+    exact geom_sum_mul_neg r N
+  have hden : 1 - r ≠ 0 := by
+    intro hz
+    apply vdc_ratio_ne_one
+    linarith [hz]
+  have hsum : Finset.sum (Finset.range N) (fun j => r ^ j) = (1 - r ^ N) / (1 - r) := by
+    apply (eq_div_iff hden).2
+    simpa [mul_comm, mul_left_comm, mul_assoc] using hmul
+  unfold vdc_gain
+  simpa [hr] using hsum
+
+/-- Effective finite-shell Bony closure: sum of interactions is bounded by sum of gains. -/
+theorem bony_paraproduct_closure_finite
+    (interaction : ℕ → ℝ) (C : ℝ)
+    (h_bound : dyadic_interaction_bound interaction C)
+    (N : ℕ) :
+    Finset.sum (Finset.range N) (fun j => interaction j) ≤
+      C * (Finset.sum (Finset.range N) (fun j => vdc_gain j)) := by
+  have hsum :
+      Finset.sum (Finset.range N) (fun j => interaction j) ≤
+        Finset.sum (Finset.range N) (fun j => C * vdc_gain j) := by
+    apply Finset.sum_le_sum
+    intro j hj
+    exact h_bound j
+  have hfactor :
+      Finset.sum (Finset.range N) (fun j => C * vdc_gain j) =
+        C * (Finset.sum (Finset.range N) (fun j => vdc_gain j)) := by
+    simpa using (Finset.mul_sum (Finset.range N) (fun j => vdc_gain j) C).symm
+  exact hsum.trans_eq hfactor
+
+theorem bony_paraproduct_closure
+  (interaction : ℕ → ℝ) (C : ℝ) (_hC : 0 ≤ C)
+    (h_bound : dyadic_interaction_bound interaction C) (N : ℕ) :
+  Finset.sum (Finset.range N) (fun j => interaction j) ≤
+      C * ((1 - (1 / Real.sqrt 2) ^ N) / (1 - 1 / Real.sqrt 2)) := by
+  have hfinite := bony_paraproduct_closure_finite interaction C h_bound N
+  rw [vdc_gain_geometric_sum_formula] at hfinite
+  exact hfinite
+
+lemma bony_uniform_bound
+    (interaction : ℕ → ℝ) (C : ℝ) (hC : 0 ≤ C)
+    (h_bound : dyadic_interaction_bound interaction C) (N : ℕ) :
+  Finset.sum (Finset.range N) (fun j => interaction j) ≤ C / (1 - 1 / Real.sqrt 2) := by
+  have hsum := bony_paraproduct_closure interaction C hC h_bound N
+  have hpow_nonneg : 0 ≤ (1 / Real.sqrt 2) ^ N := by positivity
+  have hnum_le : 1 - (1 / Real.sqrt 2) ^ N ≤ 1 := by linarith
+  have hden_pos : 0 < 1 - 1 / Real.sqrt 2 := by linarith [vdc_ratio_lt_one]
+  have hfrac_le :
+      (1 - (1 / Real.sqrt 2) ^ N) / (1 - 1 / Real.sqrt 2) ≤
+        1 / (1 - 1 / Real.sqrt 2) := by
+    exact div_le_div_of_nonneg_right hnum_le (le_of_lt hden_pos)
+  calc
+    Finset.sum (Finset.range N) (fun j => interaction j)
+        ≤ C * ((1 - (1 / Real.sqrt 2) ^ N) / (1 - 1 / Real.sqrt 2)) := hsum
+    _ ≤ C * (1 / (1 - 1 / Real.sqrt 2)) := by
+          exact mul_le_mul_of_nonneg_left hfrac_le hC
+    _ = C / (1 - 1 / Real.sqrt 2) := by ring
 
 end BonyClosure

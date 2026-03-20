@@ -1,6 +1,6 @@
 import NavierStokes.Physics.NavierStokesEq
 
-open Real Complex Torus3 NavierStokesEq
+open Real Complex NavierStokesEq
 
 noncomputable section
 

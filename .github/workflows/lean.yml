@@ -38,6 +38,16 @@ jobs:
         run: |
           lake build NavierStokes
 
+      - name: Axiom Audit (Checklist baseline)
+        run: |
+          lake env lean Checklist.lean | tee axiom-report.txt
+
+      - name: Upload Axiom Audit Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: axiom-report
+          path: axiom-report.txt
+
       - name: Build Documentation (Génération du site web)
         run: |
           lake build NavierStokes:docs

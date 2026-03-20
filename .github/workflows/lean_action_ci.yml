@@ -18,4 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: leanprover/lean-action@v1
+
+      - name: Axiom Audit (Checklist baseline)
+        run: lake env lean Checklist.lean
+
       - uses: leanprover-community/docgen-action@v1
