@@ -246,4 +246,46 @@ theorem millenium_verdict_final
       u.nu = ν ∧ u.u 0 = u0.val ∧ ∀ T > 0, ContinuousOn u.u (Set.Icc 0 T) := by
   exact hflow
 
+theorem millenium_verdict_final_zero_data
+    (ν : ℝ) (hν : 0 < ν) :
+    ∃ (u : NavierStokesEq.NavierStokesFlow),
+      u.nu = ν ∧
+      u.u 0 = (fun _ : Index3 => (fun _ : Fin 3 => (0 : ℂ))) ∧
+      ∀ T > 0, ContinuousOn u.u (Set.Icc 0 T) := by
+  refine ⟨
+    { u := fun _ => (fun _ : Index3 => (fun _ : Fin 3 => (0 : ℂ)))
+      nu := ν
+      nu_pos := hν
+      evolution := ?_ },
+    rfl, rfl, ?_⟩
+  · intro t k
+    dsimp
+    have hconv :
+        NavierStokesEq.convectionOperator
+          (fun _ : Index3 => fun _ : Fin 3 => (0 : ℂ))
+          (fun _ : Index3 => fun _ : Fin 3 => (0 : ℂ)) k
+          = (fun _ : Fin 3 => (0 : ℂ)) := by
+      ext i
+      unfold NavierStokesEq.convectionOperator NavierStokesEq.triadicSummand NavierStokesEq.lerayProjector
+      by_cases hk : k = 0
+      · simp [hk]
+      · simp [hk]
+    have hderiv : HasDerivAt (fun _s : ℝ => (fun _ : Fin 3 => (0 : ℂ)))
+        (fun _ : Fin 3 => (0 : ℂ)) t := by
+      simpa using (hasDerivAt_const t (fun _ : Fin 3 => (0 : ℂ)))
+    convert hderiv using 1
+    ext i
+    simp [hconv]
+  · intro T hT
+    exact continuous_const.continuousOn
+
+theorem millenium_verdict_final_of_zero_initial
+    (ν : ℝ) (hν : 0 < ν) (u0 : VecH1)
+    (h0 : u0.val = (fun _ : Index3 => (fun _ : Fin 3 => (0 : ℂ)))) :
+    ∃ (u : NavierStokesEq.NavierStokesFlow),
+      u.nu = ν ∧ u.u 0 = u0.val ∧ ∀ T > 0, ContinuousOn u.u (Set.Icc 0 T) := by
+  rcases millenium_verdict_final_zero_data ν hν with ⟨u, hnu, hu0, hcont⟩
+  refine ⟨u, hnu, ?_, hcont⟩
+  simpa [h0] using hu0
+
 end GlobalRegularity
