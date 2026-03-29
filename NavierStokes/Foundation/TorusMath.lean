@@ -69,25 +69,20 @@ les classes d'équivalence a.e. de l'espace Lp de Mathlib, nous axiomatisons
 uniquement la linéarité évidente de la transformation de Fourier.
 -/
 
-lemma fourier_integral_zero (k : Fin 3 → ℤ) (i : Fin 3) :
+theorem fourier_integral_zero (k : Fin 3 → ℤ) (i : Fin 3) :
   (∫ x : Torus3, ((0 : Torus3.L2RealVector) x i : ℂ) * star (char3D k x) ∂volume) = 0 := by
-  have h_ae :
-      (fun x : Torus3 => ((0 : Torus3.L2RealVector) x i : ℂ) * star (char3D k x))
-        =ᶠ[ae volume] (fun _ => 0) := by
-    filter_upwards [Lp.coeFn_zero (EuclideanSpace ℝ (Fin 3)) 2 volume] with x hx
-    simp [hx]
-  rw [integral_congr_ae h_ae, integral_zero]
+  simp
 
-lemma fourier_integral_neg (u : Torus3.L2RealVector) (k : Fin 3 → ℤ) (i : Fin 3) :
+theorem fourier_integral_neg (u : Torus3.L2RealVector) (k : Fin 3 → ℤ) (i : Fin 3) :
   (∫ x : Torus3, ((-u) x i : ℂ) * star (char3D k x) ∂volume) = 
   - (∫ x : Torus3, (u x i : ℂ) * star (char3D k x) ∂volume) := by
   simp
 
-lemma fourier_integral_add (u v : Torus3.L2RealVector) (k : Fin 3 → ℤ) (i : Fin 3) :
+theorem fourier_integral_add (u v : Torus3.L2RealVector) (k : Fin 3 → ℤ) (i : Fin 3) :
   (∫ x : Torus3, ((u + v) x i : ℂ) * star (char3D k x) ∂volume) = 
   (∫ x : Torus3, (u x i : ℂ) * star (char3D k x) ∂volume) + 
   (∫ x : Torus3, (v x i : ℂ) * star (char3D k x) ∂volume) := by
-  simp
+  simp [add_mul]
 
 /-!
 ### 2. Lemmes Algébriques Préparatoires (Zéro Sorry)
